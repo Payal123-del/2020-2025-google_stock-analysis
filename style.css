@@ -45,3 +45,10 @@ h3 {
   font-weight: bold;
   color: #555;
 }
+
+#dataChart {
+  width: 100% !important;
+  height: 400px; /* ya 500px agar zyada bada chahiye */
+}
+
+
