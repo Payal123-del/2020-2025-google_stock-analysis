@@ -1,6 +1,5 @@
 const DATA_URL = 'https://raw.githubusercontent.com/Payal123-del/2020-2025-google_stock-analysis/main/google_stock.csv';
 
-
 async function fetchData() {
   try {
     document.getElementById('status').textContent = "Fetching stock data...";
@@ -26,7 +25,7 @@ async function fetchData() {
       };
     });
 
-    const recentData = parsed.slice(-50); // show last 50 records
+    const recentData = parsed.slice(-50);
 
     chart.data.labels = recentData.map(d => d.time);
     chart.data.datasets[0].data = recentData.map(d => d.value);
@@ -43,7 +42,7 @@ const ctx = document.getElementById('dataChart').getContext('2d');
 const chart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: [], // filled by fetchData
+    labels: [],
     datasets: [{
       label: 'Google Stock Price (Close)',
       data: [],
@@ -69,9 +68,7 @@ const chart = new Chart(ctx, {
   }
 });
 
-// Call fetchData initially
 fetchData();
-
-// Optionally refresh every 60 seconds:
 setInterval(fetchData, 60000);
+
 
