@@ -25,34 +25,46 @@ async function fetchData() {
       };
     });
 
-    // Keep last 50 data points for clarity
     const recentData = parsed.slice(-50);
+
+    // Create gradient colors along the line based on value (higher value = brighter blue)
+    const lineColors = recentData.map(d => {
+      const intensity = Math.floor(100 + (d.value - Math.min(...parsed.map(p => p.value))) * 155 / (Math.max(...parsed.map(p => p.value)) - Math.min(...parsed.map(p => p.value))));
+      return `rgb(0, 0, ${intensity})`;
+    });
 
     const trace = {
       x: recentData.map(d => d.time),
       y: recentData.map(d => d.value),
       type: 'scatter',
       mode: 'lines+markers',
-      name: 'Close',
-      line: { color: 'royalblue', width: 3 },
-      marker: { size: 6, color: 'orange', symbol: 'circle' },
+      name: 'Google Close Price',
+      line: { 
+        width: 4,
+        color: 'blue', // default line, gradient simulated via markers
+        shape: 'spline' 
+      },
+      marker: {
+        size: 8,
+        color: lineColors,
+        symbol: 'circle'
+      },
       fill: 'tozeroy',
       fillcolor: 'rgba(135, 206, 250, 0.3)',
-      hovertemplate: '%{x}: $%{y}<extra></extra>'
+      hovertemplate: 'Date: %{x}<br>Close: $%{y}<extra></extra>'
     };
 
     const layout = {
-      title: '📈 Google Stock Price (Close)',
+      title: '📈 Google Stock Price (Close, 2020–2025)',
       plot_bgcolor: 'white',
       paper_bgcolor: 'white',
-      xaxis: { showgrid: true, gridcolor: 'lightgrey' },
-      yaxis: { showgrid: true, gridcolor: 'lightgrey' },
-      margin: { t: 50, l: 50, r: 50, b: 50 }
+      xaxis: { title: 'Date', showgrid: true, gridcolor: 'lightgrey' },
+      yaxis: { title: 'Close Price (USD)', showgrid: true, gridcolor: 'lightgrey' },
+      margin: { t: 60, l: 60, r: 40, b: 60 },
+      hovermode: 'x unified'
     };
 
-    // Plot or update chart
     Plotly.newPlot('dataChart', [trace], layout, {responsive: true});
-
     document.getElementById('status').textContent = "Updated: " + new Date().toLocaleTimeString();
 
   } catch (error) {
@@ -61,6 +73,5 @@ async function fetchData() {
   }
 }
 
-// Initial fetch & update every 60 seconds
 fetchData();
 setInterval(fetchData, 60000);
