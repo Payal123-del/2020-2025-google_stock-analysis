@@ -25,9 +25,9 @@ async function fetchData() {
       };
     });
 
+    // Keep last 50 data points for clarity
     const recentData = parsed.slice(-50);
 
-    // PLOTLY TRACE
     const trace = {
       x: recentData.map(d => d.time),
       y: recentData.map(d => d.value),
@@ -37,7 +37,8 @@ async function fetchData() {
       line: { color: 'royalblue', width: 3 },
       marker: { size: 6, color: 'orange', symbol: 'circle' },
       fill: 'tozeroy',
-      fillcolor: 'rgba(135, 206, 250, 0.3)'
+      fillcolor: 'rgba(135, 206, 250, 0.3)',
+      hovertemplate: '%{x}: $%{y}<extra></extra>'
     };
 
     const layout = {
@@ -49,6 +50,7 @@ async function fetchData() {
       margin: { t: 50, l: 50, r: 50, b: 50 }
     };
 
+    // Plot or update chart
     Plotly.newPlot('dataChart', [trace], layout, {responsive: true});
 
     document.getElementById('status').textContent = "Updated: " + new Date().toLocaleTimeString();
@@ -59,6 +61,6 @@ async function fetchData() {
   }
 }
 
-// Initial fetch & auto-update every 60s
+// Initial fetch & update every 60 seconds
 fetchData();
 setInterval(fetchData, 60000);
