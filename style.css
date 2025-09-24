@@ -1,31 +1,47 @@
 body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f4f6f8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  padding: 0;
 }
 
 .container {
-  width: 80%;
   max-width: 1000px;
-  background: white;
-  padding: 2rem;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 1rem;
+  color: #1a73e8;
+}
+
+h2 {
+  color: #1a73e8;
+  margin-top: 30px;
+}
+
+h3 {
   color: #333;
+  margin-top: 20px;
+}
+
+.stock-analysis ul {
+  list-style-type: disc;
+  margin-left: 20px;
+}
+
+.stock-analysis p {
+  margin-top: 10px;
+  line-height: 1.6;
 }
 
 #status {
-  text-align: center;
-  margin-top: 1rem;
-  color: #888;
-  font-size: 14px;
+  margin: 10px 0 20px 0;
+  font-weight: bold;
+  color: #555;
 }
