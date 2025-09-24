@@ -25,12 +25,20 @@ async function fetchData() {
       };
     });
 
-    const recentData = parsed.slice(-50);
+    const recentData = parsed.slice(-50); // last 50 points
 
-    // Create gradient colors along the line based on value (higher value = brighter blue)
+    // Normalize values for gradient (0–1)
+    const minVal = Math.min(...recentData.map(d => d.value));
+    const maxVal = Math.max(...recentData.map(d => d.value));
+    const norm = d => (d - minVal) / (maxVal - minVal);
+
+    // Generate RGB colors along the line
     const lineColors = recentData.map(d => {
-      const intensity = Math.floor(100 + (d.value - Math.min(...parsed.map(p => p.value))) * 155 / (Math.max(...parsed.map(p => p.value)) - Math.min(...parsed.map(p => p.value))));
-      return `rgb(0, 0, ${intensity})`;
+      const n = norm(d.value);
+      const r = Math.floor(0 + n*50);
+      const g = Math.floor(100 + n*100);
+      const b = Math.floor(200 + n*55);
+      return `rgb(${r},${g},${b})`;
     });
 
     const trace = {
@@ -39,10 +47,10 @@ async function fetchData() {
       type: 'scatter',
       mode: 'lines+markers',
       name: 'Google Close Price',
-      line: { 
+      line: {
         width: 4,
-        color: 'blue', // default line, gradient simulated via markers
-        shape: 'spline' 
+        color: 'rgba(0,0,0,0)', // line is transparent, we’ll use colored segments
+        shape: 'spline'
       },
       marker: {
         size: 8,
@@ -56,15 +64,16 @@ async function fetchData() {
 
     const layout = {
       title: '📈 Google Stock Price (Close, 2020–2025)',
-      plot_bgcolor: 'white',
-      paper_bgcolor: 'white',
       xaxis: { title: 'Date', showgrid: true, gridcolor: 'lightgrey' },
       yaxis: { title: 'Close Price (USD)', showgrid: true, gridcolor: 'lightgrey' },
+      plot_bgcolor: 'white',
+      paper_bgcolor: 'white',
       margin: { t: 60, l: 60, r: 40, b: 60 },
       hovermode: 'x unified'
     };
 
     Plotly.newPlot('dataChart', [trace], layout, {responsive: true});
+
     document.getElementById('status').textContent = "Updated: " + new Date().toLocaleTimeString();
 
   } catch (error) {
@@ -75,3 +84,4 @@ async function fetchData() {
 
 fetchData();
 setInterval(fetchData, 60000);
+    
