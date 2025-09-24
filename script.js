@@ -12,68 +12,72 @@ async function fetchData() {
 
     const dateIndex = headers.indexOf('Date');
     const closeIndex = headers.indexOf('Close');
+    const lowIndex = headers.indexOf('Low');
+    const highIndex = headers.indexOf('High');
+    const volumeIndex = headers.indexOf('Volume');
 
-    if (dateIndex === -1 || closeIndex === -1) {
-      throw new Error("CSV headers not found (Date, Close)");
+    if ([dateIndex, closeIndex, lowIndex, highIndex, volumeIndex].includes(-1)) {
+      throw new Error("CSV headers not found (Date, Close, Low, High, Volume)");
     }
 
     const parsed = rows.slice(1).map(row => {
       const cols = row.split(',');
       return {
         time: cols[dateIndex],
-        value: parseFloat(cols[closeIndex])
+        close: parseFloat(cols[closeIndex]),
+        low: parseFloat(cols[lowIndex]),
+        high: parseFloat(cols[highIndex]),
+        volume: parseInt(cols[volumeIndex])
       };
     });
 
-    const recentData = parsed.slice(-50); // last 50 points
+    const recentData = parsed.slice(-50);
 
-    // Normalize values for gradient (0–1)
-    const minVal = Math.min(...recentData.map(d => d.value));
-    const maxVal = Math.max(...recentData.map(d => d.value));
+    // Gradient for Close markers
+    const minVal = Math.min(...recentData.map(d => d.close));
+    const maxVal = Math.max(...recentData.map(d => d.close));
     const norm = d => (d - minVal) / (maxVal - minVal);
+    const colors = recentData.map(d => `rgb(0, 0, ${100 + norm(d.close)*155})`);
 
-    // Generate RGB colors along the line
-    const lineColors = recentData.map(d => {
-      const n = norm(d.value);
-      const r = Math.floor(0 + n*50);
-      const g = Math.floor(100 + n*100);
-      const b = Math.floor(200 + n*55);
-      return `rgb(${r},${g},${b})`;
-    });
-
-    const trace = {
+    // Main Close price line
+    const closeTrace = {
       x: recentData.map(d => d.time),
-      y: recentData.map(d => d.value),
+      y: recentData.map(d => d.close),
       type: 'scatter',
       mode: 'lines+markers',
-      name: 'Google Close Price',
-      line: {
-        width: 4,
-        color: 'rgba(0,0,0,0)', // line is transparent, we’ll use colored segments
-        shape: 'spline'
-      },
-      marker: {
-        size: 8,
-        color: lineColors,
-        symbol: 'circle'
-      },
+      name: 'Close Price',
+      line: { width: 3, color: 'rgba(0,0,0,0)', shape: 'spline' },
+      marker: { size: 8, color: colors, symbol: 'circle' },
+      hovertemplate: 
+        'Date: %{x}<br>Close: $%{y}<br>Low: %{customdata[0]}<br>High: %{customdata[1]}<br>Volume: %{customdata[2]}<extra></extra>',
+      customdata: recentData.map(d => [d.low, d.high, d.volume]),
       fill: 'tozeroy',
-      fillcolor: 'rgba(135, 206, 250, 0.3)',
-      hovertemplate: 'Date: %{x}<br>Close: $%{y}<extra></extra>'
+      fillcolor: 'rgba(135,206,250,0.2)'
+    };
+
+    // Shaded range between Low and High
+    const rangeTrace = {
+      x: [...recentData.map(d => d.time), ...recentData.map(d => d.time).reverse()],
+      y: [...recentData.map(d => d.high), ...recentData.map(d => d.low).reverse()],
+      fill: 'toself',
+      fillcolor: 'rgba(173,216,230,0.3)',
+      line: { color: 'rgba(0,0,0,0)' },
+      type: 'scatter',
+      name: 'Price Range',
+      hoverinfo: 'skip'
     };
 
     const layout = {
-      title: '📈 Google Stock Price (Close, 2020–2025)',
+      title: '📈 Google Stock Analysis (2020–2025)',
       xaxis: { title: 'Date', showgrid: true, gridcolor: 'lightgrey' },
-      yaxis: { title: 'Close Price (USD)', showgrid: true, gridcolor: 'lightgrey' },
+      yaxis: { title: 'Price (USD)', showgrid: true, gridcolor: 'lightgrey' },
       plot_bgcolor: 'white',
       paper_bgcolor: 'white',
       margin: { t: 60, l: 60, r: 40, b: 60 },
       hovermode: 'x unified'
     };
 
-    Plotly.newPlot('dataChart', [trace], layout, {responsive: true});
-
+    Plotly.newPlot('dataChart', [rangeTrace, closeTrace], layout, {responsive: true});
     document.getElementById('status').textContent = "Updated: " + new Date().toLocaleTimeString();
 
   } catch (error) {
@@ -84,4 +88,3 @@ async function fetchData() {
 
 fetchData();
 setInterval(fetchData, 60000);
-    
