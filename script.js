@@ -27,48 +27,38 @@ async function fetchData() {
 
     const recentData = parsed.slice(-50);
 
-    chart.data.labels = recentData.map(d => d.time);
-    chart.data.datasets[0].data = recentData.map(d => d.value);
-    chart.update();
+    // PLOTLY TRACE
+    const trace = {
+      x: recentData.map(d => d.time),
+      y: recentData.map(d => d.value),
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: 'Close',
+      line: { color: 'royalblue', width: 3 },
+      marker: { size: 6, color: 'orange', symbol: 'circle' },
+      fill: 'tozeroy',
+      fillcolor: 'rgba(135, 206, 250, 0.3)'
+    };
+
+    const layout = {
+      title: '📈 Google Stock Price (Close)',
+      plot_bgcolor: 'white',
+      paper_bgcolor: 'white',
+      xaxis: { showgrid: true, gridcolor: 'lightgrey' },
+      yaxis: { showgrid: true, gridcolor: 'lightgrey' },
+      margin: { t: 50, l: 50, r: 50, b: 50 }
+    };
+
+    Plotly.newPlot('dataChart', [trace], layout, {responsive: true});
 
     document.getElementById('status').textContent = "Updated: " + new Date().toLocaleTimeString();
+
   } catch (error) {
     console.error("Error fetching/parsing CSV:", error);
     document.getElementById('status').textContent = "Error fetching data.";
   }
 }
 
-const ctx = document.getElementById('dataChart').getContext('2d');
-const chart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [{
-      label: 'Google Stock Price (Close)',
-      data: [],
-      borderColor: 'rgba(75, 192, 192, 1)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      tension: 0.3,
-      fill: true
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      x: {
-        ticks: {
-          maxRotation: 90,
-          minRotation: 45
-        }
-      },
-      y: {
-        beginAtZero: false
-      }
-    }
-  }
-});
-
+// Initial fetch & auto-update every 60s
 fetchData();
 setInterval(fetchData, 60000);
-
-
